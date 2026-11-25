@@ -1,0 +1,412 @@
+/* All styling for the Animator app. Its code only attaches class names. */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; }
+
+/* ── Layout: two columns ─────────────────────────────────────────────────── */
+
+.app {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  background: #1a1a2e;
+  color: #d4c5a0;
+  font-family: system-ui, sans-serif;
+  font-size: 14px;
+}
+
+/* Left column: layers sidebar + code editor. Width is set inline via the ⟨ control. */
+.code-col {
+  position: relative;
+  min-width: 160px;
+  flex-shrink: 0;
+  display: flex;
+  border-right: 2px solid #5a5a8a;
+  background: #0f0f1e;
+}
+
+/* Editor collapsed: keep layers; hide the draw-code panel (DOM stays for CodeMirror). */
+.app.editor-collapsed .code-panel {
+  display: none;
+}
+.app.editor-collapsed .code-col {
+  min-width: 160px;
+}
+
+/* Resizing from the ⟨ / ⟩ button. */
+.app.resizing {
+  cursor: col-resize;
+  user-select: none;
+}
+.app.resizing .code-col,
+.app.resizing .canvas-area {
+  pointer-events: none;
+}
+.app.resizing .collapse-code,
+.app.resizing .reveal-code {
+  pointer-events: auto;
+}
+
+/* ── Layers sidebar (extension step 1) ──────────────────────────────────── */
+
+.layers-sidebar {
+  width: 160px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #3a3a5e;
+  background: #12122a;
+  overflow: hidden;
+}
+.layers-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 10px;
+  background: #1a1a3e;
+  border-bottom: 1px solid #3a3a5e;
+}
+.layers-title {
+  color: #e8d8b0;
+  font-family: 'Georgia', serif;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+.layers-list {
+  flex: 1;
+  overflow: auto;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.layer-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 6px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  background: #0d0d1a;
+  color: #d4c5a0;
+  font-size: 12px;
+  user-select: none;
+}
+.layer-row:hover { background: #1a1a3e; }
+.layer-row.selected {
+  border-color: #6a6aaa;
+  background: #1e1e42;
+}
+.layer-row.hidden-layer {
+  opacity: 0.45;
+}
+.layer-row-main {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+.layer-handle {
+  color: #6a7a8a;
+  cursor: grab;
+  font-size: 10px;
+  letter-spacing: -2px;
+}
+.layer-swatch {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  border-radius: 2px;
+  border: 1px solid #6a6aaa;
+}
+.layer-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.layer-btn {
+  padding: 2px 6px;
+  font-size: 12px;
+}
+.layer-offset {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  cursor: default;
+}
+.layer-offset-label {
+  flex-shrink: 0;
+  font-size: 10px;
+  color: #8a9aaa;
+}
+.layer-offset input[type="range"] {
+  flex: 1;
+  min-width: 0;
+  height: 14px;
+  cursor: pointer;
+}
+.layer-offset-value {
+  flex-shrink: 0;
+  min-width: 1.8em;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 10px;
+  color: #cfe3ff;
+  text-align: right;
+}
+.drawing-select-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+/* The code column stays in the DOM when collapsed, so CodeMirror keeps its
+   state; hiding it gives the right column the full width. */
+.app.code-hidden .code-col { display: none; }
+
+/* A small emoji button (the code pane's collapse toggle, and the playback
+   controls once they exist). */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #2a2a4a;
+  color: #d4c5a0;
+  border: 1px solid #4a4a8a;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 5px 8px;
+}
+.icon-btn:hover { background: #3a3a5e; }
+
+.slider-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 1 140px;
+  max-width: 160px;
+}
+.slider-control input[type="range"] {
+  width: 72px;
+  flex: 0 0 72px;
+}
+.slider-value {
+  min-width: 1.6em;
+  padding: 0;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 11px;
+  color: #cfe3ff;
+  text-align: right;
+}
+.color-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.color-control input[type="color"] {
+  width: 28px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid #4a4a8a;
+  border-radius: 4px;
+  background: #2a2a4a;
+  cursor: pointer;
+}
+
+/* Collapse control sits on the outside edge, aligned with the header controls. */
+.collapse-code {
+  position: absolute;
+  top: 10px;
+  right: -14px;
+  z-index: 20;
+  cursor: col-resize;
+}
+.collapse-code.layers-edge-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: default;
+}
+
+/* "New Drawing" menu entry — action, not an existing saved file. */
+.drawing-select {
+  flex: 0 1 auto;
+  max-width: 140px;
+  background: #2a2a4a;
+  color: #d4c5a0;
+  border: 1px solid #4a4a8a;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 13px;
+}
+option.new-drawing {
+  font-style: italic;
+  color: #8a9aaa;
+}
+
+/* ── Code panel (left column) ───────────────────────────────────────────── */
+
+.code-panel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  background: #1a1a3e;
+  border-bottom: 1px solid #3a3a5e;
+}
+.code-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+  justify-content: flex-end;
+}
+.code-title {
+  color: #e8d8b0;
+  font-family: 'Georgia', serif;
+  font-size: 16px;
+  letter-spacing: 1px;
+  flex-shrink: 0;
+}
+.drawing-name {
+  width: 96px;
+  flex: 0 0 96px;
+  background: #0d0d1a;
+  color: #d4c5a0;
+  border: 1px solid #3a3a5e;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 13px;
+}
+.drawing-name:focus {
+  outline: none;
+  border-color: #6a6aaa;
+}
+
+/* Wrapper holding the editor. */
+.code-editor-wrap {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  display: flex;
+}
+/* CodeMirror mount node: grows to fill the panel. */
+.code-editor {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow: hidden;
+  background: #0d0d1a;
+}
+.code-editor .cm-editor { width: 100%; height: 100%; }
+
+/* Collapsible reference of the built-ins available to draw functions. */
+.reference {
+  margin: 8px 14px 0;
+  border: 1px solid #3a3a5e;
+  border-radius: 4px;
+  background: #0d0d1a;
+  overflow: hidden;
+}
+.reference-summary {
+  padding: 6px 12px;
+  cursor: pointer;
+  color: #b8a888;
+  font-family: monospace;
+  font-size: 12px;
+  user-select: none;
+}
+.reference-summary:hover { color: #e8d8b0; }
+.reference-body {
+  padding: 4px 12px 10px;
+  border-top: 1px solid #3a3a5e;
+}
+.reference-group { margin-top: 8px; }
+.reference-group-title {
+  color: #8a8aca;
+  font-family: monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+.reference-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  padding: 1px 0;
+}
+.reference-sig {
+  color: #89ddff;
+  font-family: monospace;
+  font-size: 12px;
+  white-space: pre;
+}
+.reference-desc { color: #6a7a8a; font-size: 11px; }
+
+/* ── Animation area (right column) ──────────────────────────────────────── */
+
+.canvas-area {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a0a14;
+  container-type: size;
+}
+
+/* The interpreter's List(Path) (or its error), shown as text before the
+   animation pane is built. */
+.output {
+  align-self: stretch;
+  margin: 0;
+  padding: 16px;
+  overflow: auto;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #cfe3ff;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+/* Leave room for the reveal button, which only overlays this pane while the
+   code column is hidden. */
+.app.code-hidden .output { padding-top: 48px; }
+
+/* Button that reveals the code column again when it is hidden. */
+.reveal-code {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 10;
+}
+
+/* A centred square that fits the (possibly non-square) animation area. Give your
+   <canvas> this class, so that drawings aren't stretched. */
+.canvas {
+  width: min(100cqw, 100cqh);
+  height: min(100cqw, 100cqh);
+}
+
